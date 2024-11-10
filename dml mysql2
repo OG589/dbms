@@ -1,0 +1,82 @@
+-- Step 1: Create the Tables
+CREATE TABLE Customer (
+    CustID INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Cust_Address VARCHAR(100),
+    Phone_no VARCHAR(15),
+    Age INT
+);
+
+CREATE TABLE Branch (
+    Branch_ID INT PRIMARY KEY,
+    Branch_Name VARCHAR(50),
+    Address VARCHAR(100)
+);
+
+CREATE TABLE Account (
+    Account_no INT PRIMARY KEY,
+    Branch_ID INT,
+    CustID INT,
+    date_open DATE,
+    Account_type VARCHAR(20),
+    Balance DECIMAL(15, 2),
+    FOREIGN KEY (Branch_ID) REFERENCES Branch(Branch_ID),
+    FOREIGN KEY (CustID) REFERENCES Customer(CustID)
+);
+
+-- Step 2: Insert Sample Data
+INSERT INTO Customer (CustID, Name, Cust_Address, Phone_no, Age) VALUES
+(1, 'Amit Sharma', 'Pune', '9876543210', 40),
+(2, 'Rajesh Gupta', 'Mumbai', '9876543220', 25),
+(3, 'Neha Verma', 'Pune', '9876543230', 36),
+(4, 'Priya Singh', 'Delhi', '9876543240', 28);
+
+INSERT INTO Branch (Branch_ID, Branch_Name, Address) VALUES
+(1, 'Main Branch', 'Pune'),
+(2, 'City Branch', 'Mumbai');
+
+INSERT INTO Account (Account_no, Branch_ID, CustID, date_open, Account_type, Balance) VALUES
+(1001, 1, 1, '2022-01-15', 'Saving Account', 75000),
+(1002, 2, 2, '2022-02-10', 'Current Account', 50000),
+(1003, 1, 3, '2023-03-20', 'Saving Account', 10000),
+(1004, 2, 4, '2021-07-30', 'Saving Account', 25000);
+
+-- Step 3: Alter the Customer Table to Add Email_Address Column
+ALTER TABLE Customer ADD COLUMN Email_Address VARCHAR(50);
+
+-- Step 4: Rename Email_Address Column to Email_ID
+ALTER TABLE Customer CHANGE COLUMN Email_Address Email_ID VARCHAR(50);
+
+-- Step 5: Queries
+
+-- 5.1 Display the customer details with the highest balance in the account
+SELECT c.*
+FROM Customer c
+JOIN Account a ON c.CustID = a.CustID
+WHERE a.Balance = (SELECT MAX(Balance) FROM Account);
+
+-- 5.2 Display the customer details with the lowest balance for account type = “Saving Account”
+SELECT c.*
+FROM Customer c
+JOIN Account a ON c.CustID = a.CustID
+WHERE a.Balance = (SELECT MIN(Balance) FROM Account WHERE Account_type = 'Saving Account')
+  AND a.Account_type = 'Saving Account';
+
+-- 5.3 Display the customer details who live in Pune and have age greater than 35
+SELECT *
+FROM Customer
+WHERE Cust_Address = 'Pune' AND Age > 35;
+
+-- 5.4 Display the CustID, Name, and Age of customers in ascending order of their age
+SELECT CustID, Name, Age
+FROM Customer
+ORDER BY Age ASC;
+
+-- 5.5 Display the Name and Branch ID of customers grouped by the Account_type
+SELECT c.Name, a.Branch_ID, a.Account_type
+FROM Customer c
+JOIN Account a ON c.CustID = a.CustID
+GROUP BY a.Account_type, c.Name, a.Branch_ID
+ORDER BY a.Account_type;
+
+COMMIT;

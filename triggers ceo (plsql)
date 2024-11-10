@@ -1,36 +1,37 @@
--- Table creation scripts
-CREATE TABLE IF NOT EXISTS Employee (
-    emp_id INT PRIMARY KEY,
-    emp_name VARCHAR(100),
-    salary DECIMAL(10, 2),
-    designation VARCHAR(50)
+-- Table creation for Employee and Salary_Backup
+CREATE TABLE Employee (
+    emp_id NUMBER PRIMARY KEY,
+    emp_name VARCHAR2(100),
+    salary NUMBER(10, 2),
+    designation VARCHAR2(50)
 );
 
-CREATE TABLE IF NOT EXISTS Salary_Backup (
-    emp_id INT,
-    old_salary DECIMAL(10, 2),
-    new_salary DECIMAL(10, 2),
-    salary_difference DECIMAL(10, 2)
+CREATE TABLE Salary_Backup (
+    emp_id NUMBER,
+    old_salary NUMBER(10, 2),
+    new_salary NUMBER(10, 2),
+    salary_difference NUMBER(10, 2)
 );
 
 -- Trigger to record salary changes in Salary_Backup
-CREATE TRIGGER record_salary_change
-AFTER UPDATE ON Employee
+CREATE OR REPLACE TRIGGER trg_record_salary_change
+AFTER UPDATE OF salary ON Employee
 FOR EACH ROW
 BEGIN
-    IF OLD.salary <> NEW.salary THEN
+    IF :OLD.salary <> :NEW.salary THEN
         INSERT INTO Salary_Backup (emp_id, old_salary, new_salary, salary_difference)
-        VALUES (OLD.emp_id, OLD.salary, NEW.salary, NEW.salary - OLD.salary);
+        VALUES (:OLD.emp_id, :OLD.salary, :NEW.salary, :NEW.salary - :OLD.salary);
     END IF;
 END;
+/
 
 -- Trigger to prevent deletion of CEO record
-CREATE TRIGGER prevent_ceo_deletion
+CREATE OR REPLACE TRIGGER trg_prevent_ceo_deletion
 BEFORE DELETE ON Employee
 FOR EACH ROW
 BEGIN
-    IF OLD.designation = 'CEO' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Cannot delete record of an employee with the designation CEO';
+    IF :OLD.designation = 'CEO' THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Cannot delete record of an employee with the designation CEO');
     END IF;
 END;
+/

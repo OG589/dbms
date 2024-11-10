@@ -1,0 +1,49 @@
+// Step 1: Create the Book Collection and insert sample data
+db.Book.insertMany([
+    { Title: "Introduction to Algorithms", Author_name: "Thomas H. Cormen", Borrowed_status: true, Price: 450 },
+    { Title: "The Pragmatic Programmer", Author_name: "Andrew Hunt", Borrowed_status: false, Price: 300 },
+    { Title: "Clean Code", Author_name: "Robert C. Martin", Borrowed_status: true, Price: 400 },
+    { Title: "Design Patterns", Author_name: "Erich Gamma", Borrowed_status: false, Price: 250 },
+    { Title: "Refactoring", Author_name: "Martin Fowler", Borrowed_status: true, Price: 350 },
+    { Title: "Artificial Intelligence", Author_name: "Stuart Russell", Borrowed_status: false, Price: 500 },
+    { Title: "JavaScript: The Good Parts", Author_name: "Douglas Crockford", Borrowed_status: true, Price: 150 },
+    { Title: "Deep Learning", Author_name: "Ian Goodfellow", Borrowed_status: false, Price: 550 }
+]);
+
+// 1. Display Author wise list of books
+db.Book.mapReduce(
+    function () { emit(this.Author_name, this.Title); },
+    function (key, values) { return values; },
+    { out: "Author_wise_books" }
+);
+
+// Result for Author wise list of books
+db.Author_wise_books.find().pretty();
+
+// 2. Display Author wise list of books with Borrowed_status as “True”
+db.Book.mapReduce(
+    function () {
+        if (this.Borrowed_status === true) {
+            emit(this.Author_name, this.Title);
+        }
+    },
+    function (key, values) { return values; },
+    { out: "Author_wise_borrowed_books" }
+);
+
+// Result for Author wise borrowed books
+db.Author_wise_borrowed_books.find().pretty();
+
+// 3. Display Author wise list of books having Price greater than 300
+db.Book.mapReduce(
+    function () {
+        if (this.Price > 300) {
+            emit(this.Author_name, this.Title);
+        }
+    },
+    function (key, values) { return values; },
+    { out: "Author_wise_books_above_300" }
+);
+
+// Result for Author wise list of books with Price greater than 300
+db.Author_wise_books_above_300.find().pretty();

@@ -1,0 +1,41 @@
+-- Schema setup
+CREATE TABLE IF NOT EXISTS Employee (
+    emp_id INT PRIMARY KEY,
+    dept_id INT,
+    emp_name VARCHAR(100),
+    DoJ DATE,
+    salary DECIMAL(10, 2),
+    commission DECIMAL(10, 2),
+    job_title VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS job_history (
+    emp_id INT,
+    old_job_title VARCHAR(100),
+    old_dept_id INT,
+    start_date DATE,
+    end_date DATE
+);
+
+-- Trigger to prevent salary decrease
+CREATE OR REPLACE TRIGGER prevent_salary_decrease
+BEFORE UPDATE OF salary ON Employee
+FOR EACH ROW
+BEGIN
+    IF :NEW.salary < :OLD.salary THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Salary cannot be decreased.');
+    END IF;
+END;
+/
+
+-- Trigger to log job title changes in job_history
+CREATE OR REPLACE TRIGGER log_job_title_change
+AFTER UPDATE OF job_title ON Employee
+FOR EACH ROW
+BEGIN
+    IF :NEW.job_title <> :OLD.job_title THEN
+        INSERT INTO job_history (emp_id, old_job_title, old_dept_id, start_date, end_date)
+        VALUES (:OLD.emp_id, :OLD.job_title, :OLD.dept_id, :OLD.DoJ, SYSDATE);
+    END IF;
+END;
+/

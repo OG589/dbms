@@ -1,4 +1,23 @@
--- 1. Create the PL/SQL Procedure to calculate and store Simple Interest, and display Earned_Interest records
+-- Step 1: Create the Account and Earned_Interest tables
+CREATE TABLE Account (
+    Account_No NUMBER PRIMARY KEY,
+    Cust_Name VARCHAR2(100),
+    Balance NUMBER,
+    NoOfYears NUMBER
+);
+
+CREATE TABLE Earned_Interest (
+    Account_No NUMBER REFERENCES Account(Account_No),
+    Interest_Amt NUMBER
+);
+
+-- Step 2: Insert sample data into the Account table
+INSERT INTO Account (Account_No, Cust_Name, Balance, NoOfYears) VALUES (1001, 'John Doe', 60000, 5);
+INSERT INTO Account (Account_No, Cust_Name, Balance, NoOfYears) VALUES (1002, 'Alice Smith', 45000, 3);
+INSERT INTO Account (Account_No, Cust_Name, Balance, NoOfYears) VALUES (1003, 'Bob Johnson', 75000, 4);
+COMMIT;
+
+-- Step 3: Create the PL/SQL Procedure to calculate simple interest
 CREATE OR REPLACE PROCEDURE calculate_interest (
     p_account_no IN NUMBER,
     p_interest_rate IN NUMBER
@@ -29,9 +48,8 @@ BEGIN
     END LOOP;
 END;
 /
--- ------------------------------------------------------------
 
--- 2. Create the PL/SQL Function to return records of accounts with Balance greater than 50,000
+-- Step 4: Create the PL/SQL Function to get accounts with balance > 50,000
 CREATE OR REPLACE FUNCTION get_high_balance_accounts
 RETURN SYS_REFCURSOR IS
     result_cursor SYS_REFCURSOR;
@@ -45,14 +63,16 @@ BEGIN
     RETURN result_cursor;
 END;
 /
--- ------------------------------------------------------------
 
--- Usage example of both the Procedure and Function:
+-- Step 5: Usage Example for Procedure and Function
 
--- To call the calculate_interest procedure (for example with Account_No = 1001 and Interest_Rate = 5%)
--- EXEC calculate_interest(1001, 5);
+-- Call the calculate_interest procedure (e.g., Account_No = 1001, Interest_Rate = 5)
+BEGIN
+    calculate_interest(1001, 5);
+END;
+/
 
--- To display accounts with Balance greater than 50,000, you can call the function as follows:
+-- Call the get_high_balance_accounts function and display results
 DECLARE
     accounts_cursor SYS_REFCURSOR;
     v_account_no Account.Account_No%TYPE;
@@ -74,3 +94,4 @@ BEGIN
     CLOSE accounts_cursor;
 END;
 /
+

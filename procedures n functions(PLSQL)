@@ -1,0 +1,76 @@
+-- 1. Create the PL/SQL Procedure to calculate and store Simple Interest, and display Earned_Interest records
+CREATE OR REPLACE PROCEDURE calculate_interest (
+    p_account_no IN NUMBER,
+    p_interest_rate IN NUMBER
+) IS
+    v_balance NUMBER;
+    v_interest_amt NUMBER;
+    v_no_of_years NUMBER;
+BEGIN
+    -- Fetch Balance and NoOfYears for the given Account_No
+    SELECT Balance, NoOfYears
+    INTO v_balance, v_no_of_years
+    FROM Account
+    WHERE Account_No = p_account_no;
+
+    -- Calculate Simple Interest: Interest = (Principal * Rate * Time) / 100
+    v_interest_amt := (v_balance * p_interest_rate * v_no_of_years) / 100;
+
+    -- Insert the calculated interest amount into Earned_Interest table
+    INSERT INTO Earned_Interest (Account_No, Interest_Amt)
+    VALUES (p_account_no, v_interest_amt);
+
+    -- Commit the transaction
+    COMMIT;
+
+    -- Display all records from Earned_Interest table
+    FOR rec IN (SELECT * FROM Earned_Interest) LOOP
+        DBMS_OUTPUT.PUT_LINE('Account_No: ' || rec.Account_No || ', Interest_Amt: ' || rec.Interest_Amt);
+    END LOOP;
+END;
+/
+-- ------------------------------------------------------------
+
+-- 2. Create the PL/SQL Function to return records of accounts with Balance greater than 50,000
+CREATE OR REPLACE FUNCTION get_high_balance_accounts
+RETURN SYS_REFCURSOR IS
+    result_cursor SYS_REFCURSOR;
+BEGIN
+    -- Open a cursor for accounts with balance greater than 50,000
+    OPEN result_cursor FOR
+        SELECT * FROM Account
+        WHERE Balance > 50000;
+    
+    -- Return the cursor to the caller
+    RETURN result_cursor;
+END;
+/
+-- ------------------------------------------------------------
+
+-- Usage example of both the Procedure and Function:
+
+-- To call the calculate_interest procedure (for example with Account_No = 1001 and Interest_Rate = 5%)
+-- EXEC calculate_interest(1001, 5);
+
+-- To display accounts with Balance greater than 50,000, you can call the function as follows:
+DECLARE
+    accounts_cursor SYS_REFCURSOR;
+    v_account_no Account.Account_No%TYPE;
+    v_cust_name Account.Cust_Name%TYPE;
+    v_balance Account.Balance%TYPE;
+    v_no_of_years Account.NoOfYears%TYPE;
+BEGIN
+    -- Get the cursor from the function
+    accounts_cursor := get_high_balance_accounts;
+
+    -- Fetch and display all records
+    LOOP
+        FETCH accounts_cursor INTO v_account_no, v_cust_name, v_balance, v_no_of_years;
+        EXIT WHEN accounts_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Account_No: ' || v_account_no || ', Cust_Name: ' || v_cust_name || ', Balance: ' || v_balance || ', NoOfYears: ' || v_no_of_years);
+    END LOOP;
+
+    -- Close the cursor
+    CLOSE accounts_cursor;
+END;
+/

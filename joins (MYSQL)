@@ -1,0 +1,90 @@
+-- 1. Creating the Locations table
+CREATE TABLE Locations (
+    Location_id INT PRIMARY KEY,
+    Street_address VARCHAR(255),
+    Postal_code VARCHAR(20),
+    City VARCHAR(100),
+    State VARCHAR(100),
+    Country_id VARCHAR(2)
+);
+
+-- 2. Creating the Manager table
+CREATE TABLE Manager (
+    Manager_id INT PRIMARY KEY,
+    Manager_name VARCHAR(100)
+);
+
+-- 3. Creating the Departments table with referential integrity
+CREATE TABLE Departments (
+    Department_id INT PRIMARY KEY,
+    Department_name VARCHAR(100),
+    Manager_id INT,
+    Location_id INT,
+    FOREIGN KEY (Manager_id) REFERENCES Manager(Manager_id),
+    FOREIGN KEY (Location_id) REFERENCES Locations(Location_id)
+);
+
+-- 4. Creating the Employee table with referential integrity
+CREATE TABLE Employee (
+    Employee_id INT PRIMARY KEY,
+    First_name VARCHAR(100),
+    Last_name VARCHAR(100),
+    Hire_date DATE,
+    Salary DECIMAL(10, 2),
+    Job_title VARCHAR(100),
+    Manager_id INT,
+    Department_id INT,
+    FOREIGN KEY (Manager_id) REFERENCES Manager(Manager_id),
+    FOREIGN KEY (Department_id) REFERENCES Departments(Department_id)
+);
+
+-- 5. Inserting sample data into Locations table
+INSERT INTO Locations (Location_id, Street_address, Postal_code, City, State, Country_id) 
+VALUES (1, '123 Main St', '12345', 'New York', 'NY', 'US');
+
+-- 6. Inserting sample data into Manager table
+INSERT INTO Manager (Manager_id, Manager_name)
+VALUES (1, 'John Doe');
+
+-- 7. Inserting sample data into Departments table
+INSERT INTO Departments (Department_id, Department_name, Manager_id, Location_id)
+VALUES 
+(1, 'IT', 1, 1), 
+(2, 'HR', 1, 1);
+
+-- 8. Inserting sample data into Employee table
+INSERT INTO Employee (Employee_id, First_name, Last_name, Hire_date, Salary, Job_title, Manager_id, Department_id)
+VALUES 
+(1, 'Alice', 'Smith', '2008-05-12', 60000, 'Software Engineer', 1, 1),
+(2, 'Bob', 'Johnson', '2010-06-15', 55000, 'HR Specialist', 1, 2),
+(3, 'Charlie', 'Williams', '2005-09-08', 70000, 'Senior Developer', 1, 1),
+(4, 'David', 'Brown', '2012-02-20', 48000, 'HR Manager', 1, 2);
+
+-- 9. Query 1: Employees Earning More Than Average Salary in IT Departments
+SELECT e.First_name, e.Last_name, e.Salary
+FROM Employee e
+JOIN Departments d ON e.Department_id = d.Department_id
+WHERE e.Salary > (SELECT AVG(Salary) FROM Employee)
+  AND d.Department_name LIKE '%IT%';
+
+-- 10. Query 2: Employees Earning the Same Salary as the Minimum Salary in All Departments
+SELECT e.First_name, e.Last_name, e.Salary
+FROM Employee e
+WHERE e.Salary = (SELECT MIN(Salary) FROM Employee WHERE Department_id = e.Department_id);
+
+-- 11. Query 3: Employees Earning Above the Average Salary for Their Department
+SELECT e.Employee_id, e.First_name, e.Last_name, e.Salary
+FROM Employee e
+WHERE e.Salary > (SELECT AVG(Salary) FROM Employee WHERE Department_id = e.Department_id);
+
+-- 12. Query 4: Department Name, Manager Name, and City
+SELECT d.Department_name, m.Manager_name, l.City
+FROM Departments d
+JOIN Manager m ON d.Manager_id = m.Manager_id
+JOIN Locations l ON d.Location_id = l.Location_id;
+
+-- 13. Query 5: Managers Whose Experience is More Than 15 Years
+SELECT m.Manager_name, e.First_name, e.Last_name, e.Hire_date, e.Salary
+FROM Manager m
+JOIN Employee e ON m.Manager_id = e.Manager_id
+WHERE DATEDIFF(CURDATE(), e.Hire_date) > (15 * 365);  -- 15 years experience

@@ -1,0 +1,87 @@
+// 1. Create the "Student" collection with the required schema
+db.createCollection("Student");
+
+// Insert sample data with Indian names into the collection
+db.Student.insertMany([
+    { roll_no: 101, name: "Rahul Sharma", class: "TE", dept: "Computer Science", aggregate_marks: 85 },
+    { roll_no: 102, name: "Priya Patel", class: "TE", dept: "Mechanical Engineering", aggregate_marks: 90 },
+    { roll_no: 103, name: "Amit Kumar", class: "SE", dept: "Computer Science", aggregate_marks: 75 },
+    { roll_no: 104, name: "Sunita Yadav", class: "SE", dept: "Mechanical Engineering", aggregate_marks: 78 },
+    { roll_no: 105, name: "Vikram Reddy", class: "BE", dept: "Electrical Engineering", aggregate_marks: 88 },
+    { roll_no: 106, name: "Geeta Iyer", class: "BE", dept: "Civil Engineering", aggregate_marks: 80 },
+    { roll_no: 107, name: "Neha Verma", class: "TE", dept: "Computer Science", aggregate_marks: 92 },
+    { roll_no: 108, name: "Ravi Singh", class: "SE", dept: "Electrical Engineering", aggregate_marks: 82 },
+    { roll_no: 109, name: "Meera Desai", class: "BE", dept: "Mechanical Engineering", aggregate_marks: 85 }
+]);
+
+// 2. MapReduce Function to Find the Total Marks of Students of "TE" Class Department-wise
+
+var mapTotalMarks = function() {
+    if (this.class === "TE") {
+        emit(this.dept, this.aggregate_marks);
+    }
+};
+
+var reduceTotalMarks = function(key, values) {
+    return Array.sum(values);
+};
+
+// Execute the MapReduce for total marks by department for "TE" class students
+db.Student.mapReduce(
+    mapTotalMarks,
+    reduceTotalMarks,
+    { out: "TotalMarks_TE" }
+);
+
+// Display the results for Total Marks of "TE" Class
+db.TotalMarks_TE.find();
+
+// 3. MapReduce Function to Find the Highest Marks of Students of "SE" Class Department-wise
+
+var mapHighestMarks = function() {
+    if (this.class === "SE") {
+        emit(this.dept, this.aggregate_marks);
+    }
+};
+
+var reduceHighestMarks = function(key, values) {
+    return Math.max.apply(Math, values);
+};
+
+// Execute the MapReduce for highest marks by department for "SE" class students
+db.Student.mapReduce(
+    mapHighestMarks,
+    reduceHighestMarks,
+    { out: "HighestMarks_SE" }
+);
+
+// Display the results for Highest Marks of "SE" Class
+db.HighestMarks_SE.find();
+
+// 4. MapReduce Function to Find the Average Marks of Students of "BE" Class Department-wise
+
+var mapAverageMarks = function() {
+    if (this.class === "BE") {
+        emit(this.dept, { totalMarks: this.aggregate_marks, count: 1 });
+    }
+};
+
+var reduceAverageMarks = function(key, values) {
+    var result = { totalMarks: 0, count: 0 };
+    values.forEach(function(value) {
+        result.totalMarks += value.totalMarks;
+        result.count += value.count;
+    });
+    result.averageMarks = result.totalMarks / result.count;
+    return result;
+};
+
+// Execute the MapReduce for average marks by department for "BE" class students
+db.Student.mapReduce(
+    mapAverageMarks,
+    reduceAverageMarks,
+    { out: "AverageMarks_BE" }
+);
+
+// Display the results for Average Marks of "BE" Class
+db.AverageMarks_BE.find();

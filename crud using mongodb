@@ -1,0 +1,38 @@
+// Create and insert 20 documents into the Social_Media collection
+db.Social_Media.insertMany([
+    { User_Id: 1, User_Name: "Amit Sharma", No_of_Posts: 120, No_of_Friends: 50, Friends_List: ["Raj", "Priya", "Ankur"], Interests: ["Sports", "Technology"] },
+    { User_Id: 2, User_Name: "Rajesh Kumar", No_of_Posts: 75, No_of_Friends: 40, Friends_List: ["Amit", "Anjali"], Interests: ["Music", "Reading"] },
+    { User_Id: 3, User_Name: "Priya Sharma", No_of_Posts: 200, No_of_Friends: 70, Friends_List: ["Amit", "Rajesh", "Ankur"], Interests: ["Fitness", "Travel"] },
+    { User_Id: 4, User_Name: "Ankur Verma", No_of_Posts: 55, No_of_Friends: 30, Friends_List: ["Amit", "Priya"], Interests: ["Photography", "Music"] },
+    { User_Id: 5, User_Name: "Anjali Verma", No_of_Posts: 150, No_of_Friends: 80, Friends_List: ["Raj", "Priya", "Amit"], Interests: ["Technology", "Fitness"] },
+    { User_Id: 6, User_Name: "Ravi Patel", No_of_Posts: 10, No_of_Friends: 10, Friends_List: ["Ankur", "Rajesh"], Interests: ["Reading"] },
+    { User_Id: 7, User_Name: "Neha Singh", No_of_Posts: 300, No_of_Friends: 100, Friends_List: ["Priya", "Anjali", "Amit"], Interests: ["Travel", "Food"] },
+    { User_Id: 8, User_Name: "Rohit Yadav", No_of_Posts: 500, No_of_Friends: 120, Friends_List: ["Rajesh", "Neha", "Amit"], Interests: ["Fitness", "Movies"] },
+    { User_Id: 9, User_Name: "Sonal Gupta", No_of_Posts: 20, No_of_Friends: 25, Friends_List: ["Anjali", "Ravi"], Interests: ["Music", "Sports"] },
+    { User_Id: 10, User_Name: "Vishal Mehta", No_of_Posts: 90, No_of_Friends: 60, Friends_List: ["Amit", "Ravi", "Neha"], Interests: ["Technology", "Science"] },
+    { User_Id: 11, User_Name: "Alok Tiwari", No_of_Posts: 130, No_of_Friends: 55, Friends_List: ["Ankur", "Raj", "Sonal"], Interests: ["Gaming", "Fitness"] },
+    { User_Id: 12, User_Name: "Suman Kaur", No_of_Posts: 110, No_of_Friends: 45, Friends_List: ["Priya", "Vishal", "Ravi"], Interests: ["Cooking", "Fitness"] },
+    { User_Id: 13, User_Name: "Shweta Singh", No_of_Posts: 50, No_of_Friends: 35, Friends_List: ["Neha", "Ravi"], Interests: ["Reading", "Technology"] },
+    { User_Id: 14, User_Name: "Sandeep Verma", No_of_Posts: 200, No_of_Friends: 90, Friends_List: ["Alok", "Anjali", "Rajesh"], Interests: ["Music", "Travel"] },
+    { User_Id: 15, User_Name: "Kiran Gupta", No_of_Posts: 60, No_of_Friends: 40, Friends_List: ["Amit", "Neha"], Interests: ["Photography", "Movies"] },
+    { User_Id: 16, User_Name: "Arun Joshi", No_of_Posts: 150, No_of_Friends: 65, Friends_List: ["Sonal", "Raj"], Interests: ["Sports", "Gaming"] },
+    { User_Id: 17, User_Name: "Pooja Rani", No_of_Posts: 220, No_of_Friends: 110, Friends_List: ["Alok", "Suman", "Sandeep"], Interests: ["Food", "Fitness"] },
+    { User_Id: 18, User_Name: "Harish Kumar", No_of_Posts: 95, No_of_Friends: 50, Friends_List: ["Vishal", "Priya"], Interests: ["Movies", "Travel"] },
+    { User_Id: 19, User_Name: "Meera Shah", No_of_Posts: 180, No_of_Friends: 90, Friends_List: ["Ankur", "Rajesh", "Neha"], Interests: ["Travel", "Fitness"] },
+    { User_Id: 20, User_Name: "Ravi Yadav", No_of_Posts: 130, No_of_Friends: 75, Friends_List: ["Anjali", "Neha", "Amit"], Interests: ["Food", "Technology"] }
+]);
+
+// 1. List all the users from collection Social_Media in formatted manner
+db.Social_Media.find().pretty();
+
+// 2. Find all users having number of posts greater than 100
+db.Social_Media.find({ No_of_Posts: { $gt: 100 } });
+
+// 3. List the user names and their respective Friends_List
+db.Social_Media.find({}, { User_Name: 1, Friends_List: 1 });
+
+// 4. Display the user ids and Friends list of users who have more than 5 friends
+db.Social_Media.find({ No_of_Friends: { $gt: 5 } }, { User_Id: 1, Friends_List: 1 });
+
+// 5. Display all users with the number of posts in descending order
+db.Social_Media.find().sort({ No_of_Posts: -1 });

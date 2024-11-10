@@ -1,0 +1,52 @@
+-- Create the Movies_Data table
+CREATE TABLE Movies_Data (
+    Movie_ID INT PRIMARY KEY,
+    Movie_Name VARCHAR(255),
+    Director VARCHAR(100),
+    Genre VARCHAR(50),
+    BoxOfficeCollection DECIMAL(15, 2)
+);
+
+-- Insert sample data
+INSERT INTO Movies_Data (Movie_ID, Movie_Name, Director, Genre, BoxOfficeCollection)
+VALUES
+(1, 'Movie A', 'Director X', 'Action', 500000.00),
+(2, 'Movie B', 'Director Y', 'Comedy', 300000.00),
+(3, 'Movie C', 'Director X', 'Action', 800000.00),
+(4, 'Movie D', 'Director Z', 'Drama', 200000.00),
+(5, 'Movie E', 'Director X', 'Action', 1000000.00),
+(6, 'Movie F', 'Director Y', 'Comedy', 450000.00),
+(7, 'Movie G', 'Director Z', 'Drama', 750000.00),
+(8, 'Movie H', 'Director X', 'Action', 1200000.00);
+
+-- 1. Display a list stating how many Movies are directed by each Director
+SELECT Director, COUNT(*) AS NumberOfMovies
+FROM Movies_Data
+GROUP BY Director;
+
+-- 2. Display list of Movies with the highest BoxOfficeCollection in each Genre
+SELECT Genre, Movie_Name, MAX(BoxOfficeCollection) AS HighestBoxOffice
+FROM Movies_Data
+GROUP BY Genre;
+
+-- 3. Display list of Movies with the highest BoxOfficeCollection in each Genre in ascending order of BoxOfficeCollection
+SELECT Genre, Movie_Name, BoxOfficeCollection
+FROM Movies_Data
+WHERE (Genre, BoxOfficeCollection) IN (
+    SELECT Genre, MAX(BoxOfficeCollection)
+    FROM Movies_Data
+    GROUP BY Genre
+)
+ORDER BY BoxOfficeCollection ASC;
+
+-- 4. Create an index on field Movie_ID
+CREATE INDEX idx_movie_id ON Movies_Data (Movie_ID);
+
+-- 5. Create an index on fields "Movie_Name" and "Director"
+CREATE INDEX idx_movie_name_director ON Movies_Data (Movie_Name, Director);
+
+-- 6. Drop an index on field Movie_ID
+DROP INDEX idx_movie_id ON Movies_Data;
+
+-- 7. Drop an index on fields "Movie_Name" and "Director"
+DROP INDEX idx_movie_name_director ON Movies_Data;

@@ -1,0 +1,79 @@
+-- Step 1: Create the Employee Table
+CREATE TABLE Employee (
+    emp_id NUMBER PRIMARY KEY,
+    dept_id NUMBER,
+    emp_name VARCHAR2(50),
+    DoJ DATE,
+    salary NUMBER,
+    commission NUMBER,
+    job_title VARCHAR2(50)
+);
+
+-- Insert some sample data for testing purposes (commission is initially NULL)
+INSERT INTO Employee VALUES (1, 101, 'Amit', TO_DATE('2010-05-15', 'YYYY-MM-DD'), 12000, NULL, 'Analyst');
+INSERT INTO Employee VALUES (2, 102, 'Raj', TO_DATE('2005-07-20', 'YYYY-MM-DD'), 9000, NULL, 'Developer');
+INSERT INTO Employee VALUES (3, 103, 'Sonal', TO_DATE('2020-09-10', 'YYYY-MM-DD'), 2500, NULL, 'Intern');
+INSERT INTO Employee VALUES (4, 104, 'Neha', TO_DATE('2012-10-01', 'YYYY-MM-DD'), 4000, NULL, 'Manager');
+
+-- Commit sample data insertion
+COMMIT;
+
+-- Step 2: Create the Procedure to Calculate and Update Employee Commission
+CREATE OR REPLACE PROCEDURE update_employee_commission IS
+BEGIN
+    FOR emp IN (SELECT emp_id, salary, MONTHS_BETWEEN(SYSDATE, DoJ) / 12 AS experience FROM Employee)
+    LOOP
+        UPDATE Employee
+        SET commission = CASE
+            WHEN emp.salary > 10000 THEN emp.salary * 0.004
+            WHEN emp.salary < 10000 AND emp.experience > 10 THEN emp.salary * 0.0035
+            WHEN emp.salary < 3000 THEN emp.salary * 0.0025
+            ELSE emp.salary * 0.0015
+        END
+        WHERE emp_id = emp.emp_id;
+    END LOOP;
+    COMMIT;
+END;
+
+-- Execute the procedure to update commission
+BEGIN
+    update_employee_commission;
+END;
+
+-- Check results after procedure execution
+SELECT * FROM Employee;
+
+-- Step 3: Create the Manager Table and add some sample data
+CREATE TABLE Manager (
+    dept_id NUMBER PRIMARY KEY,
+    manager_name VARCHAR2(50)
+);
+
+INSERT INTO Manager VALUES (101, 'John Doe');
+INSERT INTO Manager VALUES (102, 'Jane Smith');
+INSERT INTO Manager VALUES (103, 'Michael Brown');
+INSERT INTO Manager VALUES (104, 'Emily Davis');
+
+COMMIT;
+
+-- Step 4: Create the Function to Retrieve the Manager's Name based on Department ID
+CREATE OR REPLACE FUNCTION get_manager_name(department_id IN NUMBER)
+RETURN VARCHAR2 IS
+    manager_name VARCHAR2(50);
+BEGIN
+    SELECT manager_name INTO manager_name
+    FROM Manager
+    WHERE dept_id = department_id;
+    RETURN manager_name;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'No manager found for this department';
+END;
+
+-- Example of using the function to get a manager name
+DECLARE
+    manager VARCHAR2(50);
+BEGIN
+    manager := get_manager_name(101);
+    DBMS_OUTPUT.PUT_LINE('Manager of department 101: ' || manager);
+END;

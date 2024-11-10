@@ -1,21 +1,53 @@
--- 1. Trigger to ensure the salary is not decreased
-CREATE OR REPLACE TRIGGER salary_check_trigger
-BEFORE UPDATE OF salary ON Employee
+-- Create the Employee table (if not already created)
+CREATE TABLE Employee (
+    emp_id INT PRIMARY KEY,
+    emp_name VARCHAR(100),
+    dept_id INT,
+    job_title VARCHAR(50),
+    salary DECIMAL(10, 2),
+    commission DECIMAL(10, 2),
+    DoJ DATE
+);
+
+-- Create the job_history table (if not already created)
+CREATE TABLE job_history (
+    emp_id INT,
+    old_job_title VARCHAR(50),
+    old_dept_id INT,
+    start_date DATE,
+    end_date DATE
+);
+
+-- Trigger to prevent salary decrease
+CREATE OR REPLACE TRIGGER prevent_salary_decrease
+BEFORE UPDATE ON Employee
 FOR EACH ROW
 BEGIN
+    -- Check if the new salary is lower than the old salary
     IF :NEW.salary < :OLD.salary THEN
-        RAISE_APPLICATION_ERROR(-20001, 'Salary cannot be decreased!');
+        -- Raise an error if the new salary is lower
+        RAISE_APPLICATION_ERROR(-20001, 'Salary cannot be decreased.');
     END IF;
 END;
 /
 
--- 2. Trigger to log job title changes into job_history
-CREATE OR REPLACE TRIGGER job_title_change_trigger
-AFTER UPDATE OF job_title ON Employee
+-- Trigger to log job title changes in job_history table
+CREATE OR REPLACE TRIGGER track_job_title_change
+AFTER UPDATE ON Employee
 FOR EACH ROW
 BEGIN
-    -- Inserting old job details into the job_history table
-    INSERT INTO job_history (emp_id, old_job_title, old_dept_id, start_date, end_date)
-    VALUES (:OLD.emp_id, :OLD.job_title, :OLD.dept_id, :OLD.DoJ, SYSDATE);
+    -- Check if the job title has changed
+    IF :NEW.job_title != :OLD.job_title THEN
+        -- Insert the change details into job_history
+        INSERT INTO job_history (emp_id, old_job_title, old_dept_id, start_date, end_date)
+        VALUES (
+            :OLD.emp_id,           -- Employee ID
+            :OLD.job_title,        -- Old Job Title
+            :OLD.dept_id,          -- Old Department ID
+            :OLD.DoJ,              -- Date of Joining as start date
+            SYSDATE                -- System date as end date
+        );
+    END IF;
 END;
 /
+

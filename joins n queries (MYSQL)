@@ -1,0 +1,81 @@
+-- Step 1: Create Tables with Referential Integrity
+
+CREATE TABLE Departments (
+    Department_id NUMBER PRIMARY KEY,
+    Department_name VARCHAR2(50),
+    Manager_id NUMBER,
+    Location_id NUMBER
+);
+
+CREATE TABLE Locations (
+    Location_id NUMBER PRIMARY KEY,
+    Street_address VARCHAR2(100),
+    Postal_code VARCHAR2(10),
+    City VARCHAR2(50),
+    State VARCHAR2(50),
+    Country_id VARCHAR2(2)
+);
+
+CREATE TABLE Manager (
+    Manager_id NUMBER PRIMARY KEY,
+    Manager_name VARCHAR2(50)
+);
+
+CREATE TABLE Employee (
+    Employee_id NUMBER PRIMARY KEY,
+    First_name VARCHAR2(50),
+    Last_name VARCHAR2(50),
+    Hire_date DATE,
+    Salary NUMBER,
+    Job_title VARCHAR2(50),
+    Manager_id NUMBER,
+    Department_id NUMBER,
+    CONSTRAINT fk_department FOREIGN KEY (Department_id) REFERENCES Departments(Department_id),
+    CONSTRAINT fk_manager FOREIGN KEY (Manager_id) REFERENCES Manager(Manager_id)
+);
+
+-- Step 2: Insert Sample Data
+INSERT INTO Departments VALUES (1, 'IT', 101, 1);
+INSERT INTO Departments VALUES (2, 'HR', 102, 2);
+
+INSERT INTO Locations VALUES (1, '123 Tech Park', '12345', 'San Francisco', 'CA', 'US');
+INSERT INTO Locations VALUES (2, '456 Business Blvd', '67890', 'New York', 'NY', 'US');
+
+INSERT INTO Manager VALUES (101, 'John Doe');
+INSERT INTO Manager VALUES (102, 'Jane Smith');
+
+INSERT INTO Employee VALUES (1, 'Amit', 'Sharma', TO_DATE('2018-05-10', 'YYYY-MM-DD'), 70000, 'Engineer', 101, 1);
+INSERT INTO Employee VALUES (2, 'Raj', 'Singh', TO_DATE('2017-03-15', 'YYYY-MM-DD'), 65000, 'Analyst', 101, 1);
+INSERT INTO Employee VALUES (3, 'Priya', 'Kumar', TO_DATE('2019-01-20', 'YYYY-MM-DD'), 80000, 'Manager', NULL, 2);
+INSERT INTO Employee VALUES (4, 'Sonia', 'Jones', TO_DATE('2020-07-18', 'YYYY-MM-DD'), 50000, 'Engineer', 102, 2);
+INSERT INTO Employee VALUES (5, 'Arjun', 'Verma', TO_DATE('2021-11-05', 'YYYY-MM-DD'), 55000, 'Analyst', 101, 1);
+COMMIT;
+
+-- Step 3: Queries
+
+-- Query 1: Find employees with a higher salary than the employee with last_name = 'Singh'
+SELECT First_name, Last_name, Salary
+FROM Employee
+WHERE Salary > (SELECT Salary FROM Employee WHERE Last_name = 'Singh');
+
+-- Query 2: Find employees with a manager who work for a department based in the United States
+SELECT e.First_name, e.Last_name
+FROM Employee e
+JOIN Departments d ON e.Department_id = d.Department_id
+JOIN Locations l ON d.Location_id = l.Location_id
+WHERE e.Manager_id IS NOT NULL AND l.Country_id = 'US';
+
+-- Query 3: Find employees whose salary is greater than the average salary
+SELECT First_name, Last_name, Salary
+FROM Employee
+WHERE Salary > (SELECT AVG(Salary) FROM Employee);
+
+-- Query 4: Find the employee id, name, manager id, and manager's name
+SELECT e.Employee_id, e.Last_name AS Employee_Last_Name, e.Manager_id, m.Manager_name AS Manager_Last_Name
+FROM Employee e
+JOIN Manager m ON e.Manager_id = m.Manager_id;
+
+-- Query 5: Find the names and hire date of employees who were hired after 'Jones'
+SELECT First_name, Last_name, Hire_date
+FROM Employee
+WHERE Hire_date > (SELECT Hire_date FROM Employee WHERE Last_name = 'Jones');

@@ -1,0 +1,41 @@
+// 1. Create the Student_Data collection and insert sample data
+db.Student_Data.insertMany([
+    { Student_ID: 1, Student_Name: "Amit Sharma", Department: "Computer Science", Marks: 85 },
+    { Student_ID: 2, Student_Name: "Raj Patel", Department: "Electronics", Marks: 92 },
+    { Student_ID: 3, Student_Name: "Priya Singh", Department: "Computer Science", Marks: 78 },
+    { Student_ID: 4, Student_Name: "Karan Gupta", Department: "Mechanical", Marks: 88 },
+    { Student_ID: 5, Student_Name: "Sunita Rao", Department: "Electronics", Marks: 75 },
+    { Student_ID: 6, Student_Name: "Anil Kumar", Department: "Mechanical", Marks: 95 },
+    { Student_ID: 7, Student_Name: "Divya Desai", Department: "Computer Science", Marks: 91 },
+    { Student_ID: 8, Student_Name: "Vijay Mehta", Department: "Electronics", Marks: 89 },
+    { Student_ID: 9, Student_Name: "Kiran Jadhav", Department: "Mechanical", Marks: 82 },
+    { Student_ID: 10, Student_Name: "Nisha Pandey", Department: "Computer Science", Marks: 94 }
+]);
+
+// 2. Display all Students based on their departments along with an average Marks of each department
+db.Student_Data.aggregate([
+    { $group: { _id: "$Department", Average_Marks: { $avg: "$Marks" }, Students: { $push: { Student_ID: "$Student_ID", Student_Name: "$Student_Name", Marks: "$Marks" } } } }
+]);
+
+// 3. Display the number of Students associated with each department
+db.Student_Data.aggregate([
+    { $group: { _id: "$Department", Total_Students: { $sum: 1 } } }
+]);
+
+// 4. Display list of Students with the highest Marks in each Department in descending order of Marks
+db.Student_Data.aggregate([
+    { $sort: { Marks: -1 } },
+    { $group: { _id: "$Department", Highest_Marks: { $first: "$Marks" }, Students: { $push: { Student_ID: "$Student_ID", Student_Name: "$Student_Name", Marks: "$Marks" } } } }
+]);
+
+// 5. Create an index on field Student_ID
+db.Student_Data.createIndex({ Student_ID: 1 });
+
+// 6. Create an index on fields “Student_Name” and “Department”
+db.Student_Data.createIndex({ Student_Name: 1, Department: 1 });
+
+// 7. Drop an index on field Student_ID
+db.Student_Data.dropIndex({ Student_ID: 1 });
+
+// 8. Drop an index on fields “Student_Name” and “Department”
+db.Student_Data.dropIndex({ Student_Name: 1, Department: 1 });

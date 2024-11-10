@@ -1,0 +1,56 @@
+-- Create the Movies_Data table
+CREATE TABLE Movies_Data (
+    Movie_ID NUMBER PRIMARY KEY,
+    Movie_Name VARCHAR2(255),
+    Director VARCHAR2(255),
+    Genre VARCHAR2(100),
+    BoxOfficeCollection NUMBER(15, 2)
+);
+
+-- Insert sample data
+INSERT INTO Movies_Data (Movie_ID, Movie_Name, Director, Genre, BoxOfficeCollection) VALUES
+(1, 'Inception', 'Christopher Nolan', 'Sci-Fi', 800),
+(2, 'Interstellar', 'Christopher Nolan', 'Sci-Fi', 700),
+(3, 'Dunkirk', 'Christopher Nolan', 'War', 600),
+(4, 'Avatar', 'James Cameron', 'Sci-Fi', 1000),
+(5, 'Titanic', 'James Cameron', 'Romance', 1200),
+(6, 'The Dark Knight', 'Christopher Nolan', 'Action', 900),
+(7, 'Terminator', 'James Cameron', 'Action', 500);
+
+-- Query 1: Display a list of how many movies are directed by each Director
+SELECT Director, COUNT(*) AS Movies_Count
+FROM Movies_Data
+GROUP BY Director;
+
+-- Query 2: Display a list of movies with the highest BoxOfficeCollection in each Genre
+SELECT Genre, Movie_Name, Director, BoxOfficeCollection
+FROM Movies_Data
+WHERE (Genre, BoxOfficeCollection) IN (
+    SELECT Genre, MAX(BoxOfficeCollection)
+    FROM Movies_Data
+    GROUP BY Genre
+);
+
+-- Query 3: Display a list of movies with the highest BoxOfficeCollection in each Genre in ascending order of BoxOfficeCollection
+SELECT Genre, Movie_Name, Director, BoxOfficeCollection
+FROM Movies_Data
+WHERE (Genre, BoxOfficeCollection) IN (
+    SELECT Genre, MAX(BoxOfficeCollection)
+    FROM Movies_Data
+    GROUP BY Genre
+)
+ORDER BY BoxOfficeCollection ASC;
+
+-- Query 4: Create an index on the field Movie_ID
+CREATE INDEX idx_movie_id ON Movies_Data(Movie_ID);
+
+-- Query 5: Create an index on fields Movie_Name and Director
+CREATE INDEX idx_movie_name_director ON Movies_Data(Movie_Name, Director);
+
+-- Query 6: Drop the index on the field Movie_ID
+DROP INDEX idx_movie_id;
+
+-- Query 7: Drop the index on fields Movie_Name and Director
+DROP INDEX idx_movie_name_director;
+
+-- End of script

@@ -1,52 +1,45 @@
--- Create the Movies_Data table
-CREATE TABLE Movies_Data (
-    Movie_ID INT PRIMARY KEY,
-    Movie_Name VARCHAR(255),
-    Director VARCHAR(100),
-    Genre VARCHAR(50),
-    BoxOfficeCollection DECIMAL(15, 2)
-);
+use MoviesDB
+// 1. Create the Movies_Data Collection and Insert Data
+db.createCollection("Movies_Data");
 
--- Insert sample data
-INSERT INTO Movies_Data (Movie_ID, Movie_Name, Director, Genre, BoxOfficeCollection)
-VALUES
-(1, 'Movie A', 'Director X', 'Action', 500000.00),
-(2, 'Movie B', 'Director Y', 'Comedy', 300000.00),
-(3, 'Movie C', 'Director X', 'Action', 800000.00),
-(4, 'Movie D', 'Director Z', 'Drama', 200000.00),
-(5, 'Movie E', 'Director X', 'Action', 1000000.00),
-(6, 'Movie F', 'Director Y', 'Comedy', 450000.00),
-(7, 'Movie G', 'Director Z', 'Drama', 750000.00),
-(8, 'Movie H', 'Director X', 'Action', 1200000.00);
+db.Movies_Data.insertMany([
+  { Movie_ID: 1, Movie_Name: "Movie A", Director: "Director X", Genre: "Action", BoxOfficeCollection: 500000 },
+  { Movie_ID: 2, Movie_Name: "Movie B", Director: "Director Y", Genre: "Comedy", BoxOfficeCollection: 300000 },
+  { Movie_ID: 3, Movie_Name: "Movie C", Director: "Director X", Genre: "Action", BoxOfficeCollection: 800000 },
+  { Movie_ID: 4, Movie_Name: "Movie D", Director: "Director Z", Genre: "Drama", BoxOfficeCollection: 200000 },
+  { Movie_ID: 5, Movie_Name: "Movie E", Director: "Director X", Genre: "Action", BoxOfficeCollection: 1000000 },
+  { Movie_ID: 6, Movie_Name: "Movie F", Director: "Director Y", Genre: "Comedy", BoxOfficeCollection: 450000 },
+  { Movie_ID: 7, Movie_Name: "Movie G", Director: "Director Z", Genre: "Drama", BoxOfficeCollection: 750000 },
+  { Movie_ID: 8, Movie_Name: "Movie H", Director: "Director X", Genre: "Action", BoxOfficeCollection: 1200000 }
+]);
 
--- 1. Display a list stating how many Movies are directed by each Director
-SELECT Director, COUNT(*) AS NumberOfMovies
-FROM Movies_Data
-GROUP BY Director;
+// 2. Display a list stating how many Movies are directed by each “Director”.
+db.Movies_Data.aggregate([
+  { $group: { _id: "$Director", NumberOfMovies: { $sum: 1 } } }
+]);
 
--- 2. Display list of Movies with the highest BoxOfficeCollection in each Genre
-SELECT Genre, Movie_Name, MAX(BoxOfficeCollection) AS HighestBoxOffice
-FROM Movies_Data
-GROUP BY Genre;
+// 3. Display list of Movies with the highest BoxOfficeCollection in each Genre.
+db.Movies_Data.aggregate([
+  { $sort: { BoxOfficeCollection: -1 } },
+  { $group: { _id: "$Genre", Movie: { $first: "$Movie_Name" }, HighestBoxOffice: { $first: "$BoxOfficeCollection" } } }
+]);
 
--- 3. Display list of Movies with the highest BoxOfficeCollection in each Genre in ascending order of BoxOfficeCollection
-SELECT Genre, Movie_Name, BoxOfficeCollection
-FROM Movies_Data
-WHERE (Genre, BoxOfficeCollection) IN (
-    SELECT Genre, MAX(BoxOfficeCollection)
-    FROM Movies_Data
-    GROUP BY Genre
-)
-ORDER BY BoxOfficeCollection ASC;
+// 4. Display list of Movies with the highest BoxOfficeCollection in each Genre in ascending order of BoxOfficeCollection.
+db.Movies_Data.aggregate([
+  { $sort: { BoxOfficeCollection: -1 } },
+  { $group: { _id: "$Genre", Movie: { $first: "$Movie_Name" }, HighestBoxOffice: { $first: "$BoxOfficeCollection" } } },
+  { $sort: { HighestBoxOffice: 1 } }
+]);
 
--- 4. Create an index on field Movie_ID
-CREATE INDEX idx_movie_id ON Movies_Data (Movie_ID);
+// 5. Create an index on the field Movie_ID.
+db.Movies_Data.createIndex({ Movie_ID: 1 });
 
--- 5. Create an index on fields "Movie_Name" and "Director"
-CREATE INDEX idx_movie_name_director ON Movies_Data (Movie_Name, Director);
+// 6. Create an index on fields Movie_Name and Director.
+db.Movies_Data.createIndex({ Movie_Name: 1, Director: 1 });
 
--- 6. Drop an index on field Movie_ID
-DROP INDEX idx_movie_id ON Movies_Data;
+// 7. Drop the index on the field Movie_ID.
+db.Movies_Data.dropIndex("Movie_ID_1");
 
--- 7. Drop an index on fields "Movie_Name" and "Director"
-DROP INDEX idx_movie_name_director ON Movies_Data;
+// 8. Drop the index on fields Movie_Name and Director.
+db.Movies_Data.dropIndex("Movie_Name_1_Director_1");
+

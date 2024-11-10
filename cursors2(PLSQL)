@@ -1,0 +1,62 @@
+-- Step 1: Create the Employee table
+CREATE TABLE Employee (
+    Emp_id NUMBER PRIMARY KEY,
+    Emp_Name VARCHAR2(50),
+    Salary NUMBER
+);
+
+-- Step 2: Insert sample data into Employee table
+INSERT INTO Employee (Emp_id, Emp_Name, Salary) VALUES (1, 'Amit Sharma', 60000);
+INSERT INTO Employee (Emp_id, Emp_Name, Salary) VALUES (2, 'Rajesh Kumar', 48000);
+INSERT INTO Employee (Emp_id, Emp_Name, Salary) VALUES (3, 'Priya Singh', 52000);
+INSERT INTO Employee (Emp_id, Emp_Name, Salary) VALUES (4, 'Neha Verma', 75000);
+INSERT INTO Employee (Emp_id, Emp_Name, Salary) VALUES (5, 'Suresh Mehta', 45000);
+INSERT INTO Employee (Emp_id, Emp_Name, Salary) VALUES (6, 'Anjali Gupta', 56000);
+COMMIT;
+
+-- 1. Explicit Cursor to display records of all employees with salary greater than 50,000
+DECLARE
+    CURSOR high_salary_cursor IS
+        SELECT Emp_id, Emp_Name, Salary
+        FROM Employee
+        WHERE Salary > 50000;
+    emp_record high_salary_cursor%ROWTYPE;
+BEGIN
+    OPEN high_salary_cursor;
+    LOOP
+        FETCH high_salary_cursor INTO emp_record;
+        EXIT WHEN high_salary_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Emp_ID: ' || emp_record.Emp_id || ', Name: ' || emp_record.Emp_Name || ', Salary: ' || emp_record.Salary);
+    END LOOP;
+    CLOSE high_salary_cursor;
+END;
+/
+
+-- 2. PL/SQL block using Implicit Cursor to display total number of tuples in Employee table
+DECLARE
+    employee_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO employee_count FROM Employee;
+    DBMS_OUTPUT.PUT_LINE('Total number of employees: ' || employee_count);
+END;
+/
+
+-- 3. PL/SQL block using Parameterized Cursor to display salary of employee based on input Emp_id
+DECLARE
+    CURSOR salary_cursor(p_emp_id NUMBER) IS
+        SELECT Salary
+        FROM Employee
+        WHERE Emp_id = p_emp_id;
+    emp_salary Employee.Salary%TYPE;
+    emp_id_input NUMBER := &emp_id_input; -- Prompt user to enter employee ID
+BEGIN
+    OPEN salary_cursor(emp_id_input);
+    FETCH salary_cursor INTO emp_salary;
+    IF salary_cursor%FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Salary of Employee ID ' || emp_id_input || ' is: ' || emp_salary);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('No employee found with Employee ID ' || emp_id_input);
+    END IF;
+    CLOSE salary_cursor;
+END;
+/

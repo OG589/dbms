@@ -1,0 +1,78 @@
+import java.util.Scanner;
+
+public class MongoJava {
+    private static Scanner sc2;
+    public static void main(String[] args) {
+        DBCollection coll = null;
+        try{
+            MongoClient mongoclient = new MongoClient("localhost", 27017);
+            DB db = mongoclient.getDB("Institute");
+            coll = mongoclient.getCollection("Students");
+            sc2 = new Scanner(System.in);
+            int choice;
+            do{
+                System.out.println("Student Database Management");
+                System.out.println("1.Display All");
+                System.out.println("2.Insert");
+                System.out.println("3.Update");
+                System.out.println("4.Delete");
+                System.out.println("5.Conditional");
+                System.out.println("6.Exit");
+                System.out.println("Enter Your Choice: ");
+                choice = sc2.nextInt();
+
+                switch (choice){
+                    case 1:
+                        DisplayDoc(coll);
+                        break;
+                    case 2:
+                        InsertDoc(coll);
+                        break;
+                    case 3:
+                        UpdateDoc(coll);
+                        break;
+                    case 4:
+                        DeleteDoc(coll);
+                        break;
+                    case 5:
+                        CondDoc(coll);
+                        break;
+                    case 6:
+                        System.out.println("Exiting....");
+                        return;
+                    default:
+                        System.out.println("Please enter a valid choice");
+                        break;
+
+                }
+
+            }while (true);
+
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+    public static void DisplayDoc(DBCollection coll){
+        System.out.println("Displaying Documents:");
+        DBCursor cursor = coll.find();
+        while (cursor.hasNext()){
+            System.out.println(cursor.next());
+        }
+    }
+
+    public static void InsertDoc(DBCollection coll){
+        Scanner sc = new Scanner(System.in);
+        BasicDBObject document = new BasicDBObject();
+        System.out.println("Enter S roll no:");
+        int sroll = sc.nextInt();
+        System.out.println("Enter Name:");
+        String sname = sc.next();
+        System.out.println("Enter Class:");
+        int sclass = sc.nextInt();
+        System.out.println("Enter Marks");
+        int smarks = sc.nextInt();
+
+
+    }
+}
